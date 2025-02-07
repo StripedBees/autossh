@@ -1,0 +1,18 @@
+services:  
+  ssh-local-forward-on-28156:
+    image: stripedbees/autossh
+    container_name: autossh-28156
+    ports:
+      - 28156:28156/tcp
+    environment:
+      - SSH_REMOTE_USER=changeme
+      - SSH_REMOTE_HOST=remotehostip
+      - SSH_REMOTE_PORT=28156
+      - SSH_LOCAL_PORT=28156
+      - SSH_MODE=-L
+        #- SSH_KEY_FILE='/id_rsa'
+        #- SSH_KNOWN_HOSTS_FILE='/known_hosts'
+    restart: no
+      # volumes:
+      #      - /Users/lewisrk/git/autossh/id_rsa:/id_rsa:ro
+      #- /Users/lewisrk/git/autossh/known_hosts:/known_hosts:ro
