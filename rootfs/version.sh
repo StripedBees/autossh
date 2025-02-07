@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # A "common-courtesy" file inspired by @gurneyalex
 #  - Information on current version.
@@ -6,38 +6,45 @@
 
 echo "${PACKAGE} ${VERSION} revision ${REVISION} built ${BUILD_RFC3339}"
 
-if [ ! -z $SSH_TUNNEL_HOST ]; then
-    echo "[WARN ] SSH_TUNNEL_HOST is deprecated, please use SSH_TARGET_HOST"
+if [[ ! -z "${SSH_TUNNEL_HOST}" ]]; then
+    message="[WARN ] SSH_TUNNEL_HOST is deprecated, please use SSH_TARGET_HOST"
+    echo -e "\033[33m${message}\033[0m"
     WARN=true
 fi
 
-if [ ! -z $SSH_TUNNEL_LOCAL ]; then
-    echo "[WARN ] SSH_TUNNEL_LOCAL is deprecated, please use SSH_TARGET_PORT"
+if [[ ! -z "${SSH_TUNNEL_LOCAL}" ]]; then
+    message="[WARN ] SSH_TUNNEL_LOCAL is deprecated, please use SSH_TARGET_PORT"
+    echo -e "\033[33m${message}\033[0m"
     WARN=true
 fi
 
-if [ ! -z $SSH_TUNNEL_REMOTE ]; then
-    echo "[WARN ] SSH_TUNNEL_REMOTE is deprecated, please use SSH_TUNNEL_PORT"
+if [[ ! -z "${SSH_TUNNEL_REMOTE}" ]]; then
+    message="[WARN ] SSH_TUNNEL_REMOTE is deprecated, please use SSH_TUNNEL_PORT"
+    echo -e "\033[33m${message}\033[0m"
     WARN=true
 fi
 
-if [ ! -z $SSH_HOSTUSER ]; then
-    echo "[WARN ] SSH_HOSTUSER is deprecated, please use SSH_REMOTE_USER"
+if [[ ! -z "${SSH_HOSTUSER}" ]]; then
+    message="[WARN ] SSH_HOSTUSER is deprecated, please use SSH_REMOTE_USER"
+    echo -e "\033[33m${message}\033[0m"
     WARN=true
 fi
 
-if [ ! -z $SSH_HOSTNAME ]; then
-    echo "[WARN ] SSH_HOSTNAME is deprecated, please use SSH_REMOTE_HOST"
+if [[ ! -z "${SSH_HOSTNAME}" ]]; then
+    message="[WARN ] SSH_HOSTNAME is deprecated, please use SSH_REMOTE_HOST"
+    echo -e "\033[33m${message}\033[0m"
     WARN=true
 fi
 
-if [ ! -z $SSH_HOSTPORT ]; then
-    echo "[WARN ] SSH_HOSTPORT is deprecated, please use SSH_REMOTE_PORT"
+if [[ ! -z "${SSH_HOSTPORT}" ]]; then
+    message="[WARN ] SSH_HOSTPORT is deprecated, please use SSH_REMOTE_PORT"
+    echo -e "\033[33m${message}\033[0m"
     WARN=true
 fi
 
-if [ ! -z $SSH_KNOWN_HOSTS ]; then
-    echo "[WARN ] SSH_KNOWN_HOSTS is deprecated, please use SSH_KNOWN_HOSTS_FILE"
+if [[ ! -z "${SSH_KNOWN_HOSTS}" ]]; then
+    message="[WARN ] SSH_KNOWN_HOSTS is deprecated, please use SSH_KNOWN_HOSTS_FILE"
+    echo -e "\033[33m${message}\033[0m"
     WARN=true
 fi
 
