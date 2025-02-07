@@ -1,22 +1,53 @@
-#!/usr/bin/dumb-init /bin/sh
+#!/usr/bin/dumb-init /bin/bash
 source version.sh
+
+function missingFilesCheck() {
+    # $1 = File to check
+    # $2 = Expected File Name
+    # $3 = 
+    if [ ! -f "${1}" ]; then
+        POSSIBLE_KEY_FILES=$(find / -name "${2}" -type f | tr '\n' ' ')
+        POSSIBLE_KEY_FILES_LENGTH=$(echo ${POSSIBLE_KEY_FILES} | wc -w)
+
+        if [[ ${POSSIBLE_KEY_FILES_LENGTH} -gt 0 ]]; then
+            case "${2}" in 
+                "id_rsa")
+                    message="[FATAL] No SSH Key file found in ${1}. Possible files: ${POSSIBLE_KEY_FILES}"
+                    ;;
+                "known_hosts")
+                    message="[FATAL] No SSH Known Hosts file found in ${1}. Possible files: ${POSSIBLE_KEY_FILES}"
+                    ;;
+                *)
+                    message="[FATAL] No SSH file found in ${1}. Possible files: ${POSSIBLE_KEY_FILES}"
+                    ;;
+            esac
+            echo -e "\033[31m${message}\033[0m"
+            exit 1
+        else
+            case "${2}" in 
+                "id_rsa")
+                    message="[FATAL] No SSH Key file found in ${1}."
+                    ;;
+                "known_hosts")
+                    message="[FATAL] No SSH Known Hosts file found in ${1}."
+                    ;;
+                *)
+                    message="[FATAL] No SSH file found in ${1}."
+                    ;;
+            esac
+            echo -e "\033[31m${message}\033[0m"
+            exit 1
+        fi
+    fi
+
+}
 
 # Set up key file
 KEY_FILE="${SSH_KEY_FILE:=/id_rsa}"
-if [ ! -f "${KEY_FILE}" ]; then
-    POSSIBLE_KEY_FILES=$(find / -name "id_rsa" -type f | tr '\n' ' ')
-    POSSIBLE_KEY_FILES_LENGTH=$(echo ${POSSIBLE_KEY_FILES} | wc -w)
 
-    if [[ ${POSSIBLE_KEY_FILES_LENGTH} -gt 0 ]]; then
-        message="[FATAL] No SSH Key file found in ${KEY_FILE}. Possible files: ${POSSIBLE_KEY_FILES}"
-        echo -e "\033[33m${message}\033[0m"
-        exit 1
-    else
-        message="[FATAL] No SSH Key file found in ${KEY_FILE}."
-        echo -e "\033[31m${message}\033[0m"
-        exit 1
-    fi
-fi
+# Verify that the key defined key file exists
+missingFilesCheck "${KEY_FILE}" "id_rsa"
+
 eval $(ssh-agent -s)
 cat "${KEY_FILE}" | ssh-add -k -
 
@@ -24,6 +55,9 @@ cat "${KEY_FILE}" | ssh-add -k -
 # Default CheckHostIP=yes unless SSH_STRICT_HOST_IP_CHECK=false
 STRICT_HOSTS_KEY_CHECKING=no
 KNOWN_HOSTS="${SSH_KNOWN_HOSTS_FILE:=/known_hosts}"
+# Verify that the defined known_hosts file exists
+missingFilesCheck "${KNOWN_HOSTS}" "known_hosts"
+
 if [ -f "${KNOWN_HOSTS}" ]; then
     KNOWN_HOSTS_ARG="-o UserKnownHostsFile=${KNOWN_HOSTS} "
     if [ "${SSH_STRICT_HOST_IP_CHECK}" = false ]; then
