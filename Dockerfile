@@ -22,7 +22,6 @@ RUN \
   apk --no-cache add \
     autossh \
     bash \
-    curl \
     dumb-init \
     net-tools \
     netcat-openbsd && \
