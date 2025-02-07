@@ -172,9 +172,16 @@ Specify the `ssh` port the *remote* endpoint to connect. (Default: `22`)
 Specify the port number on the *remote* endpoint which will serve as the
 tunnel entrance. (Default: random > 32768)  If you do not want a new port
 every time you restart **jnovack/autossh** you may wish to explicitly set
-this.
+this, or specify the `SSH_USE_RANDOM_PORT`
 
 This option reverses if you set `SSH_MODE` (see below).
+
+#### SSH_USE_RANDOM_PORT
+
+Tells the container to randomly set the local port for port forwarding configurations.
+
+- `yes` enables this option.
+- `no` passes the same port that is specified with `SSH_TARGET_PORT`. This option is the default.
 
 #### SSH_TARGET_HOST
 
@@ -190,13 +197,6 @@ elasticsearch (port: 9200) or good old http (port: 80) and https (port: 443).
 If you are interested in tunneling other protocols securely (e.g. mysql,
 redis, mongodb) across networks via certificates you may wish to consider
 my other project [ambassador](https://hub.docker.com/r/jnovack/ambassador/).
-
-#### SSH_USE_RANDOM_PORT
-
-Tells the container to randomly set the local port for port forwarding configurations.
-
-- `yes` enables this option.
-- `no` passes the same port that is specified with `SSH_TARGET_PORT`. This option is the default.
 
 #### SSH_STRICT_HOST_IP_CHECK
 
