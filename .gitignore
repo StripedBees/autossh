@@ -1,3 +1,11 @@
 config/
 manifest-tool*
 qemu-*-static
+docker-compose.yml
+id_rsa
+id_ecdsa
+id_ed25519
+id_rsa.pub
+id_ecdsa.pub
+id_ed25519.pub
+known_hosts
