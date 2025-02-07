@@ -48,6 +48,7 @@ ENV \
   VERSION="${VERSION}"
 
 COPY ./rootfs/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 COPY ./rootfs/version.sh /version.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
