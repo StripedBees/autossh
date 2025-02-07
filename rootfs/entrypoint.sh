@@ -4,7 +4,8 @@ source version.sh
 # Set up key file
 KEY_FILE=${SSH_KEY_FILE:=/id_rsa}
 if [ ! -f "${KEY_FILE}" ]; then
-    echo "[FATAL] No SSH Key file found"
+    message="[FATAL] No SSH Key file found in ${KEY_FILE}"
+    echo -e "\033[31m${message}\033[0m"
     exit 1
 fi
 eval $(ssh-agent -s)
