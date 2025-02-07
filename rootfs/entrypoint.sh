@@ -58,14 +58,15 @@ KNOWN_HOSTS="${SSH_KNOWN_HOSTS_FILE:=/known_hosts}"
 # Verify that the defined known_hosts file exists
 missingFilesCheck "${KNOWN_HOSTS}" "known_hosts"
 
-if [ -f "${KNOWN_HOSTS}" ]; then
+if [[ -f "${KNOWN_HOSTS}" ]]; then
     KNOWN_HOSTS_ARG="-o UserKnownHostsFile=${KNOWN_HOSTS} "
-    if [ "${SSH_STRICT_HOST_IP_CHECK}" = false ]; then
+    if [[ "${SSH_STRICT_HOST_IP_CHECK}" = false ]]; then
         KNOWN_HOSTS_ARG="${KNOWN_HOSTS_ARG}-o CheckHostIP=no "
-        echo "[WARN ] Not using STRICT_HOSTS_KEY_CHECKING"
+        message="[WARN] Not using STRICT_HOSTS_KEY_CHECKING"
+        echo -e "\033[33m$message\033[0m"
     fi
     STRICT_HOSTS_KEY_CHECKING=yes
-    echo "[INFO ] Using STRICT_HOSTS_KEY_CHECKING"
+    echo "[INFO] Using STRICT_HOSTS_KEY_CHECKING"
 fi
 
 # Add entry to /etc/passwd if we are running non-root
@@ -75,19 +76,20 @@ if [[ $(id -u) != "0" ]]; then
   echo "$USER" >> /etc/passwd
 fi
 
-if [ ! -z "${SSH_BIND_IP}" ] && [ "${SSH_MODE}" = "-R" ]; then
-    echo "[WARN ] SSH_BIND_IP requires GatewayPorts configured on the server to work properly"
+if [[ ! -z "${SSH_BIND_IP}" ]] && [[ "${SSH_MODE}" = "-R" ]]; then
+    message="[WARN] SSH_BIND_IP requires GatewayPorts configured on the server to work properly"
+    echo -e "\033[33m$message\033[0m"
 fi
 
 # Pick a random port above 32768
-DEFAULT_PORT=$RANDOM
+DEFAULT_PORT=${RANDOM}
 let "DEFAULT_PORT += 32768"
 
 # Determine command line flags
 
 # Log to stdout
-echo "[INFO ] Using $(autossh -V)"
-echo "[INFO ] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
+echo "[INFO] Using $(autossh -V)"
+echo "[INFO] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
      " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}" \
      " to ${SSH_TARGET_HOST=localhost}:${SSH_TARGET_PORT:=22}"
 
@@ -104,7 +106,7 @@ COMMAND="autossh "\
 "-p ${SSH_REMOTE_PORT:=22} "\
 "${SSH_REMOTE_USER}@${SSH_REMOTE_HOST}"
 
-echo "[INFO ] # ${COMMAND}"
+echo "[INFO] # ${COMMAND}"
 
 # Run command
 exec ${COMMAND}
