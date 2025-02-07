@@ -1,11 +1,14 @@
 #!/usr/bin/dumb-init /bin/bash
-source version.sh
+./version.sh
+
+errors_encountered=no
 
 function missingFilesCheck() {
     # $1 = File to check
     # $2 = Expected File Name
     # $3 = 
     if [[ ! -f "${1}" ]]; then
+
         POSSIBLE_KEY_FILES=$(find / -name "${2}" -type f | tr '\n' ' ')
         POSSIBLE_KEY_FILES_LENGTH=$(echo "${POSSIBLE_KEY_FILES}" | wc -w)
 
@@ -15,6 +18,7 @@ function missingFilesCheck() {
                     message="[FATAL] No SSH Key file found in ${1}. Possible files: ${POSSIBLE_KEY_FILES}"
                     ;;
                 "known_hosts")
+                    ls -l /
                     message="[FATAL] No SSH Known Hosts file found in ${1}. Possible files: ${POSSIBLE_KEY_FILES}"
                     ;;
                 *)
@@ -22,7 +26,8 @@ function missingFilesCheck() {
                     ;;
             esac
             echo -e "\033[31m${message}\033[0m"
-            exit 1
+            errors_encountered=yes
+            # exit 1
         else
             case "${2}" in 
                 "id_rsa")
@@ -36,8 +41,12 @@ function missingFilesCheck() {
                     ;;
             esac
             echo -e "\033[31m${message}\033[0m"
-            exit 1
+            errors_encountered=yes
+            # exit 1
         fi
+    else
+        chmod 0600 "${1}"
+        echo "[INFO] Found ${2} file: ${1}"
     fi
 
 }
@@ -101,41 +110,68 @@ fi
 # Log to stdout
 
 echo "[INFO] Using $(autossh -V)"
-echo "[INFO] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
-     " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}" \
-     " to ${SSH_TARGET_HOST=localhost}:${SSH_TARGET_PORT:=22}"
+
+if [[ -z "${SSH_TUNNEL_PORT}" && -z "${SSH_TARGET_PORT}" ]]; then
+    message="[WARN] SSH_TUNNEL_PORT or SSH_TARGET_PORT not set. No Port Fowarding will be done."
+    echo -e "\033[33m$message\033[0m"
+
+else
+    echo "[INFO] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
+        " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}" \
+        " to ${SSH_TARGET_HOST=localhost}:${SSH_TARGET_PORT:=22}"
+
+    PORT_FORWARD="${SSH_MODE:=-R} ${SSH_BIND_IP}:${SSH_TUNNEL_PORT}:${SSH_TARGET_HOST}:${SSH_TARGET_PORT}"
+fi
+
+
+
 
 # Display proxy command in output
 if [[ "${SSH_PROXY_COMMAND}" ]]; then
     # Verify that proxy command exists on container.
-    proxy_command=$( echo "${SSH_PROXY_COMMAND}" | awk -F ' ' '{print $1}')
+    proxy_command=$( echo "${SSH_PROXY_COMMAND}" | awk -F ' ' '{print $1}' | sed 's/[\"'\'']//g' )
     if command -v "${proxy_command}" &> /dev/null; then
         message="[INFO] ProxyCommand found: ${proxy_command}"
         echo -e "${message}"
     else
         message="[FATAL] ProxyCommand not found: ${proxy_command}"
         echo -e "\033[31m${message}\033[0m"
-        exit 1
+        errors_encountered=yes
+        # exit 1
     fi
+    # Remove quotes from proxy command
+    if [[ "${SSH_PROXY_COMMAND}" == \'*\' ]]; then
+        SSH_PROXY_COMMAND="${SSH_PROXY_COMMAND:1:-1}"
+    fi
+    use_proxy_command_path=$(command -v "${proxy_command}" | awk -F '/' '{OFS="/"; $NF=""; print}')
+    # Encapsulate proxy command in single quotes if it is not already
+    if [[ "${SSH_PROXY_COMMAND}" != \"*\" ]]; then
+        SSH_PROXY_COMMAND="\"${SSH_PROXY_COMMAND}\" "
+    fi
+    SSH_PROXY_COMMAND="-o ProxyCommand=\"${use_proxy_command_path}${SSH_PROXY_COMMAND:1}"
+
     message="[INFO] Using ProxyCommand: ${SSH_PROXY_COMMAND}"
     echo -e "${message}"
 fi
+use_autossh=$(command -v autossh)
 
-COMMAND="autossh "\
-"-M 0 "\
-"-N "\
-"-o StrictHostKeyChecking=${STRICT_HOSTS_KEY_CHECKING} ${KNOWN_HOSTS_ARG:=}"\
-"-o ServerAliveInterval=${SSH_SERVER_ALIVE_INTERVAL:-10} "\
-"-o ServerAliveCountMax=${SSH_SERVER_ALIVE_COUNT_MAX:-3} "\
-"-o ExitOnForwardFailure=yes "\
-"${SSH_OPTIONS} "\
-"${SSH_PROXY_COMMAND} "\
-"-t -t "\
-"${SSH_MODE:=-R} ${SSH_BIND_IP}:${SSH_TUNNEL_PORT}:${SSH_TARGET_HOST}:${SSH_TARGET_PORT} "\
-"-p ${SSH_REMOTE_PORT:=22} "\
-"${SSH_REMOTE_USER}@${SSH_REMOTE_HOST}"
+
+COMMAND="${use_autossh} -M 0 -N \
+  -o StrictHostKeyChecking=${STRICT_HOSTS_KEY_CHECKING} ${KNOWN_HOSTS_ARG:=} \
+  -o ServerAliveInterval=${SSH_SERVER_ALIVE_INTERVAL:-10} \
+  -o ServerAliveCountMax=${SSH_SERVER_ALIVE_COUNT_MAX:-3} \
+  -o ExitOnForwardFailure=yes ${SSH_OPTIONS} ${SSH_PROXY_COMMAND} \
+  -t -t ${PORT_FORWARD} \
+  -p ${SSH_REMOTE_PORT:=22} \
+  ${SSH_REMOTE_USER}@${SSH_REMOTE_HOST}"
+
 
 echo "[INFO] # ${COMMAND}"
 
-# Run command
-exec ${COMMAND}
+if [[ "${errors_encountered}" = "yes" ]]; then
+    echo -e "\033[31m[FATAL] Errors encountered. Exiting\033[0m"
+    exit 1
+else
+    # Run command (Do not add quotes to ${COMMAND} below)
+    eval "${COMMAND}"
+fi
