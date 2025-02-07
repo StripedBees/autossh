@@ -1,5 +1,18 @@
 # stripedbees/autossh
 
+## v2.1.1
+
+- Bug Fixes
+  - Added checks to ensure autossh and nc (netcat) are installed before executing the command.
+  - Improved error handling and messaging for missing commands.
+  - Fixed an issue where the script would exit with code 127 due to missing files or commands.
+  - Added debug information to print the command before execution for easier troubleshooting.
+
+- Enhancements
+  - Encapsulated the proxy command in single quotes if not already.
+  - Ensured the SSH_PROXY_COMMAND is correctly formatted and used.
+  - Used eval to execute the constructed command string, allowing the script to continue execution.
+
 ## v2.1.0
 
 - Added additional Options
