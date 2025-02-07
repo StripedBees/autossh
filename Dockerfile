@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-ARG APPLICATION="myapp"
+ARG APPLICATION="autossh"
 ARG BUILD_RFC3339="1970-01-01T00:00:00Z"
 ARG REVISION="local"
 ARG DESCRIPTION="no description"
@@ -9,7 +9,7 @@ ARG VERSION="dirty"
 
 LABEL org.opencontainers.image.ref.name="${PACKAGE}" \
   org.opencontainers.image.created=$BUILD_RFC3339 \
-  org.opencontainers.image.authors="Justin J. Novack <jnovack@gmail.com>" \
+  org.opencontainers.image.authors="TuxHD2 <admin@tuxhd.net>" \
   org.opencontainers.image.documentation="https://github.com/${PACKAGE}/README.md" \
   org.opencontainers.image.description="${DESCRIPTION}" \
   org.opencontainers.image.licenses="MIT" \
@@ -21,7 +21,11 @@ LABEL org.opencontainers.image.ref.name="${PACKAGE}" \
 RUN \
   apk --no-cache add \
     autossh \
-    dumb-init && \
+    bash \
+    curl \
+    dumb-init \
+    net-tools \
+    netcat-openbsd && \
   chmod g+w /etc/passwd
 
 ENV \
