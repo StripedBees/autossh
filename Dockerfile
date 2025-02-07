@@ -22,10 +22,12 @@ RUN \
   apk --no-cache add \
     autossh \
     bash \
+    curl \
     dumb-init \
     net-tools \
     netcat-openbsd && \
   chmod g+w /etc/passwd
+
 
 ENV \
   AUTOSSH_PIDFILE=/tmp/autossh.pid \
