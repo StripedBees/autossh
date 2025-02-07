@@ -2,19 +2,28 @@
 source version.sh
 
 # Set up key file
-KEY_FILE=${SSH_KEY_FILE:=/id_rsa}
+KEY_FILE="${SSH_KEY_FILE:=/id_rsa}"
 if [ ! -f "${KEY_FILE}" ]; then
-    message="[FATAL] No SSH Key file found in ${KEY_FILE}"
-    echo -e "\033[31m${message}\033[0m"
-    exit 1
+    POSSIBLE_KEY_FILES=$(find / -name "id_rsa" -type f | tr '\n' ' ')
+    POSSIBLE_KEY_FILES_LENGTH=$(echo ${POSSIBLE_KEY_FILES} | wc -w)
+
+    if [[ ${POSSIBLE_KEY_FILES_LENGTH} -gt 0 ]]; then
+        message="[FATAL] No SSH Key file found in ${KEY_FILE}. Possible files: ${POSSIBLE_KEY_FILES}"
+        echo -e "\033[33m${message}\033[0m"
+        exit 1
+    else
+        message="[FATAL] No SSH Key file found in ${KEY_FILE}."
+        echo -e "\033[31m${message}\033[0m"
+        exit 1
+    fi
 fi
 eval $(ssh-agent -s)
-cat "${SSH_KEY_FILE}" | ssh-add -k -
+cat "${KEY_FILE}" | ssh-add -k -
 
 # If known_hosts is provided, STRICT_HOST_KEY_CHECKING=yes
 # Default CheckHostIP=yes unless SSH_STRICT_HOST_IP_CHECK=false
 STRICT_HOSTS_KEY_CHECKING=no
-KNOWN_HOSTS=${SSH_KNOWN_HOSTS_FILE:=/known_hosts}
+KNOWN_HOSTS="${SSH_KNOWN_HOSTS_FILE:=/known_hosts}"
 if [ -f "${KNOWN_HOSTS}" ]; then
     KNOWN_HOSTS_ARG="-o UserKnownHostsFile=${KNOWN_HOSTS} "
     if [ "${SSH_STRICT_HOST_IP_CHECK}" = false ]; then
