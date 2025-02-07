@@ -1,4 +1,6 @@
-# Contributors
+# Contributions to original jnovack/autossh
+
+## Contributors
 
 - [@ccremer](https://github.com/ccremer)
 - [Christian Gahlert](https://github.com/chrisgahlert)
