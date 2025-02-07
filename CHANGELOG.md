@@ -1,5 +1,10 @@
 # jnovack/autossh
 
+## v2.0.1
+
+Updating packages in Dockerfiles
+Updating the base image version
+
 ## v2.0.0
 
 ### Breaking Changes in v2.0.0
