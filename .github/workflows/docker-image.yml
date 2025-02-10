@@ -1,0 +1,77 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: "Login to Docker Hub"
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: "Remove latest release from Docker Hub"
+      run: docker rmi stripedbees/autossh:latest || true
+
+    - name: "Export Version Variable"
+      run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_ENV
+
+    - name: "Build the Docker image x86_64"
+      run: docker build --no-cache --platform linux/amd64 --tag stripedbees/autossh:amd64 .
+
+    - name: "Push image"
+      run: "docker push stripedbees/autossh:amd64"
+      
+    - name: "Build the Docker image armv6"
+      run: docker build --no-cache --platform linux/arm/v6 --tag stripedbees/autossh:armv6 .
+
+    - name: "Push image armv6"
+      run: docker push stripedbees/autossh:armv6
+
+    - name: "Build the Docker image armv7"
+      run: docker build --no-cache --platform linux/arm/v7 --tag stripedbees/autossh:armv7 .
+
+    - name: "Push image armv7"
+      run: docker push stripedbees/autossh:armv7
+
+    - name: "Build the Docker image armv8"
+      run: docker build --no-cache --platform linux/arm/v8 --tag stripedbees/autossh:armv8 .
+
+    - name: "Push image armv8"
+      run: docker push stripedbees/autossh:armv8
+
+    - name: "Create manifest"
+      run: docker manifest create stripedbees/autossh:$VERSION \
+            stripedbees/autossh:amd64 \
+            stripedbees/autossh:armv6 \
+            stripedbees/autossh:armv7 \
+            stripedbees/autossh:armv8 || \
+            docker manifest create stripedbees/autossh:$VERSION \
+            stripedbees/autossh:amd64 \
+            stripedbees/autossh:armv6 \
+            stripedbees/autossh:armv7 \
+            stripedbees/autossh:armv8 --amend
+
+    - name: "Push manifest"
+      run: docker manifest push stripedbees/autossh:$VERSION
+
+
+    - name: "Remove latest release from Docker Hub"
+      run: docker rmi stripedbees/autossh:amd64:latest || true
+    
+    - name: "Remove latest release from Docker Hub"
+      run: docker rmi stripedbees/autossh:armv6:latest || true
+    
+    - name: "Remove latest release from Docker Hub"
+      run: docker rmi stripedbees/autossh:armv7:latest || true
+    
+    - name: "Remove latest release from Docker Hub"
+      run: docker rmi stripedbees/autossh:armv8:latest || true
