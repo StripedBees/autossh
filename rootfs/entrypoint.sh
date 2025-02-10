@@ -116,14 +116,12 @@ if [[ -z "${SSH_TUNNEL_PORT}" && -z "${SSH_TARGET_PORT}" ]]; then
     echo -e "\033[33m$message\033[0m"
 
 else
-    echo "[INFO] Tunneling ${SSH_BIND_IP:=127.0.0.1}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
+    echo "[INFO] Tunneling ${SSH_BIND_IP:=0.0.0.0}:${SSH_TUNNEL_PORT:=${DEFAULT_PORT}}" \
         " on ${SSH_REMOTE_USER:=root}@${SSH_REMOTE_HOST:=localhost}:${SSH_REMOTE_PORT}" \
         " to ${SSH_TARGET_HOST=localhost}:${SSH_TARGET_PORT:=22}"
 
     PORT_FORWARD="${SSH_MODE:=-R} ${SSH_BIND_IP}:${SSH_TUNNEL_PORT}:${SSH_TARGET_HOST}:${SSH_TARGET_PORT}"
 fi
-
-
 
 
 # Display proxy command in output
