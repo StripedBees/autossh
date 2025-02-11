@@ -1,13 +1,15 @@
 # autossh
 
-[![Docker](https://badgen.net/badge/jnovack/autossh/blue?icon=docker)](https://hub.docker.com/r/jnovack/autossh)
-[![Github](https://badgen.net/badge/jnovack/autossh/purple?icon=github)](https://github.com/jnovack/autossh)
+[![Docker](https://badgen.net/badge/stripedbees/autossh/blue?icon=docker)](https://hub.docker.com/r/stripedbees/autossh)
+[![Github](https://badgen.net/badge/stripedbees/autossh/purple?icon=github)](https://github.com/stripedbees/autossh)
 
 Highly customizable AutoSSH docker container.
 
+> Forked from `jnovack/autossh`
+
 ## Overview
 
-**jnovack/autossh** is a small lightweight (~15MB) image that attempts to
+**stripedbees/autossh** is a small lightweight (~15MB) image that attempts to
 provide a secure way to establish an SSH Tunnel without including your keys in
 the image itself or linking to the host.
 
@@ -93,7 +95,7 @@ It is a two-step process.
 
 To make this a one-step process (connecting from *source* to *target* via
 *remote*), you must make some security changes on the *remote* (not-advised).
-Please see the [SSH_BIND_IP](#SSH_BIND_IP) section below.
+Please see the `SSH_BIND_IP`(#SSH_BIND_IP) section below.
 
 #### Disclaimer
 
@@ -112,11 +114,11 @@ event there is ever a need to revoke one or the other.
 ```text
 $ ssh-keygen -t rsa -b 4096 -C "autossh" -f autossh_id_rsa
 Generating public/private rsa key pair.
-Enter file in which to save the key (/home/jnovack/autossh_id_rsa):
+Enter file in which to save the key (/home/stripedbees/autossh_id_rsa):
 Enter passphrase (empty for no passphrase):
 Enter same passphrase again:
-Your identification has been saved in /home/jnovack/autossh_id_rsa.
-Your public key has been saved in /home/jnovack/autossh_id_rsa.pub.
+Your identification has been saved in /home/stripedbees/autossh_id_rsa.
+Your public key has been saved in /home/stripedbees/autossh_id_rsa.pub.
 The key fingerprint is:
 00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff autossh
 The key's randomart image is:
@@ -144,7 +146,7 @@ required to tunnel SSH, but for ease of grouping.  The only SSH connection
 that is required is from the LOCAL device to the REMOTE server.  However, if
 you are interested in tunneling other protocols securely (e.g. mysql, redis,
 mongodb) across networks with certificates, you may wish to consider my other
-project [ambassador](https://hub.docker.com/r/jnovack/ambassador/).
+project [ambassador](https://hub.docker.com/r/stripedbees/ambassador/).
 
 #### SSH_PROXY_COMMAND
 
@@ -171,7 +173,7 @@ Specify the `ssh` port the *remote* endpoint to connect. (Default: `22`)
 
 Specify the port number on the *remote* endpoint which will serve as the
 tunnel entrance. (Default: random > 32768)  If you do not want a new port
-every time you restart **jnovack/autossh** you may wish to explicitly set
+every time you restart **stripedbees/autossh** you may wish to explicitly set
 this, or specify the `SSH_USE_RANDOM_PORT`
 
 This option reverses if you set `SSH_MODE` (see below).
@@ -196,7 +198,7 @@ elasticsearch (port: 9200) or good old http (port: 80) and https (port: 443).
 
 If you are interested in tunneling other protocols securely (e.g. mysql,
 redis, mongodb) across networks via certificates you may wish to consider
-my other project [ambassador](https://hub.docker.com/r/jnovack/ambassador/).
+my other project [ambassador](https://hub.docker.com/r/stripedbees/ambassador/).
 
 #### SSH_STRICT_HOST_IP_CHECK
 
@@ -224,16 +226,16 @@ Defines how the tunnel will be set up:
 
 #### SSH_BIND_IP
 
-You can define which IP address the tunnel will use to bind on *remote* 
+You can define which IP address the tunnel will use to bind on *remote*
 (SSH_MODE of `-R`) or *local* (SSH_MODE of `-L`). The default
 is `127.0.0.1` only.
 
 ##### SSH_MODE of `-R` (default)
 
-**WARNING**: _This process involves changing the security on the server
-and will expose your *target* to additional networks and potentially the
-Internet.  It is not recommended to do this procedure without taking
-additional precautions._
+> **WARNING**: This process involves changing the security on the server
+> and will expose your *target* to additional networks and potentially the
+> Internet.  It is not recommended to do this procedure without taking
+> additional precautions.
 
 Use of this option will NOT have an effect unless you properly configure the
 `GatewayPorts` variable in your *remote* server's configuration file.  Please
@@ -241,7 +243,7 @@ see your SSH server documentation for proper set up.
 
 ##### SSH_MODE of `-L`
 
-You may want to set this to `0.0.0.0` in order to bind your `SSH_TUNNEL_PORT` 
+You may want to set this to `0.0.0.0` in order to bind your `SSH_TUNNEL_PORT`
 to all interfaces on *local* side.
 
 #### SSH_SERVER_ALIVE_INTERVAL
@@ -264,13 +266,14 @@ Sets the threshold of alive messages after which the connection is terminated an
 
 Additional details are available from [`ssh_config(5)`](https://linux.die.net/man/5/ssh_config)
 
-#### SSH_OPTIONS 
+#### SSH_OPTIONS
 
-Sets additional parameters to `ssh` connection. Supports more than one parameter. 
+Sets additional parameters to `ssh` connection. Supports more than one parameter.
 
 Examples:
- - SSH_OPTIONS="-o StreamLocalBindUnlink=yes" for recreate socket if it exists
- - SSH_OPTIONS="-o StreamLocalBindUnlink=yes -o UseRoaming=no" for multiple parameters
+
+- `SSH_OPTIONS="-o StreamLocalBindUnlink=yes" for recreate socket if it exists`
+- `SSH_OPTIONS="-o StreamLocalBindUnlink=yes -o UseRoaming=no" for multiple parameters`
 
 Additional details are available from [`ssh_config(5)`](https://linux.die.net/man/5/ssh_config)
 
@@ -282,7 +285,7 @@ Additional details are available from [`ssh_config(5)`](https://linux.die.net/ma
 ### Mounts
 
 Mounts are optional, for simple usage.  It is far superior to use
-[environment variables](#Environment_Variables) which can be stored in
+`environment variables`(#Environment_Variables) which can be stored in
 configuration files and transported (and backed up!) easily.
 
 #### /id_rsa
@@ -329,7 +332,7 @@ version: '3.7'
 
 services:
   ssh-to-docker-host:
-    image: jnovack/autossh
+    image: stripedbees/autossh
     container_name: autossh-ssh-to-docker-host
     environment:
       - SSH_REMOTE_USER=sshuser
@@ -345,7 +348,7 @@ services:
       - 1.1.1.1
 
   ssh-to-lan-endpoint:
-    image: jnovack/autossh
+    image: stripedbees/autossh
     container_name: autossh-ssh-to-lan-endpoint
     environment:
       - SSH_REMOTE_USER=sshuser
@@ -361,7 +364,7 @@ services:
       - 4.2.2.4
   
   ssh-local-forward-on-1234:
-    image: jnovack/autossh
+    image: stripedbees/autossh
     container_name: autossh-ssh-local-forward
     environment:
       - SSH_REMOTE_USER=sshuser
@@ -386,6 +389,4 @@ services:
 This image has the following architectures automatically built on Docker Hub.
 
 - `amd64`
-- `armv6` (e.g. Raspberry Pi Zero)
-- `armv7` (e.g. Raspberry Pi 2 through 4)
-- `arm64v8` (e.g. Amazon EC2 A1 Instances)
+- `arm64`
